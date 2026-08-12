@@ -1,4 +1,6 @@
 // Router mínimo basado en hash (#/tabla/3/juego2), sin dependencias externas.
+import { stopSpeech } from '../engine/speech.js';
+
 const routes = [];
 
 function extractKeys(pattern) {
@@ -31,6 +33,7 @@ export function getEpoch() {
 
 function dispatch(defaultPath) {
   epoch++;
+  stopSpeech();
   const path = currentPath(defaultPath);
   for (const route of routes) {
     const match = path.match(route.regex);

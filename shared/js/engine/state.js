@@ -3,7 +3,7 @@
 import { BASE_TABLE_IDS, EXTRA_TABLE_IDS, GAME_KEYS } from '../data/tables.js';
 
 const STORAGE_KEY = 'tablasCamila.progress.v1';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 function emptyTableProgress() {
   return {
@@ -24,7 +24,7 @@ function defaultState() {
     unlockedBase: [1],
     unlockedExtra: false,
     tables,
-    settings: { muted: false, voiceEnabled: true, preferredVoiceURI: null },
+    settings: { voiceMuted: false, voiceEnabled: true, audioMuted: false, preferredVoiceURI: null },
   };
 }
 
@@ -32,9 +32,21 @@ let memoryState = null;
 let persistenceAvailable = true;
 
 function migrate(data) {
-  // Punto único de migración futura: si cambia el schema, transformar aquí por versión.
   if (!data || typeof data !== 'object') return defaultState();
   if (data.schemaVersion === SCHEMA_VERSION) return data;
+  if (data.schemaVersion === 1) {
+    // v1 tenía un solo settings.muted para todo; se separa en voz vs
+    // música+efectos, conservando el resto del progreso tal cual.
+    const oldMuted = !!data.settings?.muted;
+    data.settings = {
+      voiceMuted: oldMuted,
+      audioMuted: oldMuted,
+      voiceEnabled: data.settings?.voiceEnabled ?? true,
+      preferredVoiceURI: data.settings?.preferredVoiceURI ?? null,
+    };
+    data.schemaVersion = SCHEMA_VERSION;
+    return data;
+  }
   return defaultState();
 }
 
@@ -73,9 +85,16 @@ export function getSettings() {
   return load().settings;
 }
 
-export function setMuted(muted) {
+export function setVoiceMuted(muted) {
   const s = load();
-  s.settings.muted = muted;
+  s.settings.voiceMuted = muted;
+  save();
+  return s.settings;
+}
+
+export function setAudioMuted(muted) {
+  const s = load();
+  s.settings.audioMuted = muted;
   save();
   return s.settings;
 }

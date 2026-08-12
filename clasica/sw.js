@@ -1,5 +1,5 @@
 // Service worker de la versión Clásica: cachea el app shell para uso 100% offline.
-const CACHE_NAME = 'tablas-camila-clasica-v1';
+const CACHE_NAME = 'tablas-camila-clasica-v2';
 
 const PRECACHE_URLS = [
   './',
@@ -17,6 +17,7 @@ const PRECACHE_URLS = [
   '../shared/js/engine/questions.js',
   '../shared/js/engine/timer.js',
   '../shared/js/engine/audio.js',
+  '../shared/js/engine/music.js',
   '../shared/js/engine/speech.js',
   '../shared/js/ui/router.js',
   '../shared/js/ui/components.js',

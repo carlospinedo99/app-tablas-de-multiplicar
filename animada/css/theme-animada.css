@@ -32,15 +32,41 @@
 .mascota { display: block; transition: transform 0.25s ease; }
 .mascota[data-expr='feliz'] { animation: mascota-bounce 0.5s ease; }
 .mascota[data-expr='triste'] { animation: mascota-shake 0.4s ease; }
-.mascota[data-expr='celebrando'] { animation: mascota-bounce 0.6s ease infinite alternate; }
+.mascota[data-expr='celebrando'] { animation: mascota-celebra 0.7s ease infinite alternate; }
+
+/* Vida propia en reposo: respira suave y parpadea de vez en cuando, no
+   queda congelada esperando la siguiente respuesta. */
+.mascota[data-expr='neutral'] { animation: idle-breathe 3.4s ease-in-out infinite; }
+.mascota[data-expr='neutral'] .mascota-eye {
+  animation: mascota-blink 4.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
 
 @keyframes mascota-bounce {
   0% { transform: scale(1); }
   40% { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
+@keyframes mascota-celebra {
+  0% { transform: scale(1) rotate(-4deg) translateY(0); }
+  50% { transform: scale(1.15) rotate(4deg) translateY(-6px); }
+  100% { transform: scale(1.05) rotate(-2deg) translateY(0); }
+}
 @keyframes mascota-shake {
   0%, 100% { transform: translateX(0) rotate(0); }
   25% { transform: translateX(-4px) rotate(-4deg); }
   75% { transform: translateX(4px) rotate(4deg); }
+}
+@keyframes mascota-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascota[data-expr='neutral'],
+  .mascota[data-expr='neutral'] .mascota-eye,
+  .mascota[data-expr='celebrando'] {
+    animation: none;
+  }
 }

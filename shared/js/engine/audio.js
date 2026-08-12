@@ -18,7 +18,7 @@ export function unlockAudio() {
 }
 
 function tone(freq, duration, { type = 'sine', gainPeak = 0.2, delay = 0 } = {}) {
-  if (getSettings().muted) return;
+  if (getSettings().audioMuted) return;
   const c = getCtx();
   const startAt = c.currentTime + delay;
   const osc = c.createOscillator();
@@ -45,6 +45,14 @@ export function playIncorrecto() {
 
 export function playCelebracion() {
   [523, 659, 784, 1047].forEach((freq, i) => tone(freq, 0.18, { delay: i * 0.11 }));
+}
+
+// Más grande y triunfal que playCelebracion(): reservada para completar una
+// tabla entera (Reto Final), no para el resumen de una ronda cualquiera.
+export function playFanfarria() {
+  [523, 659, 784, 1047, 1319, 1047, 1319, 1568].forEach((freq, i) =>
+    tone(freq, 0.22, { delay: i * 0.1, gainPeak: 0.22 })
+  );
 }
 
 export function playToqueSuave() {

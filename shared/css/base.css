@@ -36,35 +36,39 @@ button {
 
 /* ---------- Header ---------- */
 .app-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   padding: max(12px, env(safe-area-inset-top)) 14px 12px;
   gap: 8px;
 }
 
+.header-side { display: flex; gap: 8px; }
+.header-side-start { justify-content: flex-start; }
+.header-side-end { justify-content: flex-end; }
+
 .header-title {
-  flex: 1;
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 800;
   margin: 0;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 .header-btn {
   width: 44px;
   height: 44px;
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   border-radius: 50%;
   background: var(--color-surface);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.12s ease;
 }
-
-.header-spacer { width: 44px; height: 44px; }
+.header-btn:active { transform: scale(0.9); }
 
 .top-actions {
   display: flex;
@@ -93,6 +97,11 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: screen-enter 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen { animation: none; }
 }
 
 .level-map {
@@ -113,7 +122,9 @@ button {
   padding: 10px 4px;
   border-radius: 24px;
   background: var(--color-surface);
+  transition: transform 0.12s ease;
 }
+.level-node:not(:disabled):active { transform: scale(0.93); }
 
 .level-node .node-badge {
   width: 64px;
@@ -185,7 +196,9 @@ button {
   background: var(--color-surface);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
   text-align: center;
+  transition: transform 0.12s ease;
 }
+.game-card:not(:disabled):active, .table-pick:active { transform: scale(0.95); }
 
 .game-card:disabled { opacity: 0.5; }
 
@@ -291,7 +304,9 @@ button {
   font-weight: 800;
   background: var(--color-surface);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.1s ease;
 }
+.choice-btn:active { transform: scale(0.94); }
 
 .choice-btn.is-disabled { pointer-events: none; }
 .choice-btn.is-correct, .choice-btn.is-correct-reveal { background: var(--color-success); color: #fff; animation: pop 0.35s ease; }
@@ -320,7 +335,9 @@ button {
   border-radius: 16px;
   background: var(--color-surface);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.1s ease;
 }
+.keypad-btn:active { transform: scale(0.9); }
 
 .keypad-submit { background: var(--color-success); color: #fff; }
 .keypad-delete { background: var(--color-error); color: #fff; }
@@ -371,6 +388,10 @@ button {
 }
 
 .feedback-icon { font-size: 3rem; }
+.is-celebration .feedback-icon {
+  animation: icon-pop-bounce 0.9s cubic-bezier(0.36, 1.8, 0.4, 1) both;
+}
+.is-fanfarria .feedback-icon { font-size: 3.6rem; }
 .feedback-title { font-size: 1.4rem; font-weight: 900; }
 .feedback-message { color: var(--color-text-muted, #666); }
 
@@ -387,6 +408,12 @@ button {
   height: 16px;
   border-radius: 3px;
   animation: confetti-fall 2.4s linear infinite;
+}
+.confetti-piece.shape-circle { border-radius: 50%; }
+.confetti-piece.shape-star {
+  width: 14px;
+  height: 14px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
 }
 .piece-0 { left: 5%; background: #ff6b6b; animation-delay: 0s; }
 .piece-1 { left: 20%; background: #ffd93d; animation-delay: 0.3s; }
@@ -417,10 +444,25 @@ button {
   0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
   100% { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
 }
+@keyframes icon-pop-bounce {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+  80% { transform: scale(0.95) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes idle-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
 
 /* Expresiones de personaje/mascota genérica según data-expr */
 .generic-badge.expr-triste { background: var(--color-error); }
 .generic-badge.expr-feliz, .generic-badge.expr-celebrando { background: var(--color-success); }
+.generic-badge.expr-neutral { animation: idle-breathe 3.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .generic-badge.expr-neutral, .mascota[data-expr='neutral'] { animation: none; }
+}
 
 @media (min-width: 480px) {
   .level-map { grid-template-columns: repeat(4, 1fr); }

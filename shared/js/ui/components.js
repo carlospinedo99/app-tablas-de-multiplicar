@@ -1,27 +1,46 @@
 // Piezas de UI reutilizables entre pantallas y entre las versiones Clásica/Animada.
 import { navigate } from './router.js';
-import { getSettings, setMuted } from '../engine/state.js';
-import { playCelebracion } from '../engine/audio.js';
+import { getSettings, setVoiceMuted, setAudioMuted } from '../engine/state.js';
+import { playCelebracion, playFanfarria } from '../engine/audio.js';
+import { stopSpeech } from '../engine/speech.js';
+import { setMusicMuted } from '../engine/music.js';
 
 export function headerHtml({ title, showBack = true }) {
-  const muted = getSettings().muted;
+  const { voiceMuted, audioMuted } = getSettings();
   return `
     <header class="app-header">
-      ${showBack ? '<button class="header-btn" data-action="back" aria-label="Volver">←</button>' : '<span class="header-spacer"></span>'}
+      <div class="header-side header-side-start">
+        ${showBack ? '<button class="header-btn" data-action="back" aria-label="Volver">←</button>' : ''}
+      </div>
       <h1 class="header-title">${title}</h1>
-      <button class="header-btn" data-action="toggle-mute" aria-label="${muted ? 'Activar sonido' : 'Silenciar'}">${muted ? '🔇' : '🔊'}</button>
+      <div class="header-side header-side-end">
+        <button class="header-btn" data-action="toggle-voice" aria-label="${voiceMuted ? 'Activar voz' : 'Silenciar voz'}">${voiceMuted ? '🤐' : '🗣️'}</button>
+        <button class="header-btn" data-action="toggle-audio" aria-label="${audioMuted ? 'Activar música y efectos' : 'Silenciar música y efectos'}">${audioMuted ? '🔇' : '🎵'}</button>
+      </div>
     </header>`;
 }
 
 export function wireHeader(root, { backHref = '/' } = {}) {
   const backBtn = root.querySelector('[data-action="back"]');
   if (backBtn) backBtn.addEventListener('click', () => navigate(backHref));
-  const muteBtn = root.querySelector('[data-action="toggle-mute"]');
-  if (muteBtn) {
-    muteBtn.addEventListener('click', () => {
-      const updated = setMuted(!getSettings().muted);
-      muteBtn.textContent = updated.muted ? '🔇' : '🔊';
-      muteBtn.setAttribute('aria-label', updated.muted ? 'Activar sonido' : 'Silenciar');
+
+  const voiceBtn = root.querySelector('[data-action="toggle-voice"]');
+  if (voiceBtn) {
+    voiceBtn.addEventListener('click', () => {
+      const updated = setVoiceMuted(!getSettings().voiceMuted);
+      voiceBtn.textContent = updated.voiceMuted ? '🤐' : '🗣️';
+      voiceBtn.setAttribute('aria-label', updated.voiceMuted ? 'Activar voz' : 'Silenciar voz');
+      if (updated.voiceMuted) stopSpeech();
+    });
+  }
+
+  const audioBtn = root.querySelector('[data-action="toggle-audio"]');
+  if (audioBtn) {
+    audioBtn.addEventListener('click', () => {
+      const updated = setAudioMuted(!getSettings().audioMuted);
+      audioBtn.textContent = updated.audioMuted ? '🔇' : '🎵';
+      audioBtn.setAttribute('aria-label', updated.audioMuted ? 'Activar música y efectos' : 'Silenciar música y efectos');
+      setMusicMuted(updated.audioMuted);
     });
   }
 }
@@ -80,11 +99,19 @@ function overlayContainer(root, html) {
   return node;
 }
 
+const CONFETTI_SHAPES = ['', 'shape-circle', 'shape-star'];
+
+function confettiHtml(count) {
+  return Array.from({ length: count })
+    .map((_, i) => `<span class="confetti-piece piece-${i % 6} ${CONFETTI_SHAPES[i % CONFETTI_SHAPES.length]}"></span>`)
+    .join('');
+}
+
 export function showRoundSummary(root, { correctCount, total, nextHref }) {
   const perfect = correctCount === total;
   const node = overlayContainer(root, `
     <div class="feedback-overlay is-celebration" data-role="feedback">
-      <div class="confetti" aria-hidden="true">${Array.from({ length: 18 }).map((_, i) => `<span class="confetti-piece piece-${i % 6}"></span>`).join('')}</div>
+      <div class="confetti" aria-hidden="true">${confettiHtml(22)}</div>
       <div class="feedback-card">
         <div class="feedback-icon">${perfect ? '🌟' : '👏'}</div>
         <div class="feedback-title">${perfect ? '¡Perfecto!' : '¡Bien hecho!'}</div>
@@ -120,8 +147,8 @@ export function showTableCompletedOverlay(root, { unlockInfo, mapHref = '/' }) {
     message += ` Desbloqueaste la Tabla del ${unlockInfo.justUnlockedNextBase}.`;
   }
   const node = overlayContainer(root, `
-    <div class="feedback-overlay is-celebration" data-role="feedback">
-      <div class="confetti" aria-hidden="true">${Array.from({ length: 28 }).map((_, i) => `<span class="confetti-piece piece-${i % 6}"></span>`).join('')}</div>
+    <div class="feedback-overlay is-celebration is-fanfarria" data-role="feedback">
+      <div class="confetti" aria-hidden="true">${confettiHtml(40)}</div>
       <div class="feedback-card">
         <div class="feedback-icon">🏆</div>
         <div class="feedback-title">¡Tabla completada!</div>
@@ -129,6 +156,6 @@ export function showTableCompletedOverlay(root, { unlockInfo, mapHref = '/' }) {
         <button class="btn btn-primary" data-action="continue">Ver mapa</button>
       </div>
     </div>`);
-  playCelebracion();
+  playFanfarria();
   node.querySelector('[data-action="continue"]').addEventListener('click', () => navigate(mapHref));
 }

@@ -1,5 +1,6 @@
 // Lectura por voz en español (operación y resultado) con SpeechSynthesis.
 import { getSettings, setPreferredVoice } from './state.js';
+import { duckMusic, unduckMusic } from './music.js';
 
 const UNIDADES = ['cero', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
 const ESPECIALES_10_15 = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince'];
@@ -96,13 +97,16 @@ export function unlockSpeech() {
 function speak(text, { pitch = 1, rate = 0.95 } = {}) {
   if (!('speechSynthesis' in window)) return;
   const settings = getSettings();
-  if (settings.muted || !settings.voiceEnabled) return;
+  if (settings.voiceMuted || !settings.voiceEnabled) return;
   if (!voicesReady) initSpeech();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = cachedVoice?.lang || 'es-ES';
   if (cachedVoice) utter.voice = cachedVoice;
   utter.rate = rate;
   utter.pitch = pitch;
+  utter.onstart = () => duckMusic();
+  utter.onend = () => unduckMusic();
+  utter.onerror = () => unduckMusic();
   window.speechSynthesis.speak(utter);
 }
 

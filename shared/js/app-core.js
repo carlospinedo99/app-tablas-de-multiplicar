@@ -3,7 +3,8 @@
 import { registerRoute, startRouter } from './ui/router.js';
 import { initSpeech, unlockSpeech } from './engine/speech.js';
 import { unlockAudio } from './engine/audio.js';
-import { forceUnlockThrough } from './engine/state.js';
+import { startMusic } from './engine/music.js';
+import { forceUnlockThrough, getSettings } from './engine/state.js';
 import * as screens from './ui/screens.js';
 
 // Enlace de acceso directo: abrir la app con ?desbloquear=6 marca las tablas
@@ -34,6 +35,7 @@ export function initApp({ theme, characterRenderer } = {}) {
     unlocked = true;
     unlockAudio();
     unlockSpeech();
+    if (!getSettings().audioMuted) startMusic();
     window.removeEventListener('pointerdown', unlockOnce);
   });
 

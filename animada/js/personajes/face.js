@@ -7,8 +7,8 @@ import { INK } from './base.js';
 export function faceGroups({ cx = 50, cy = 60, eyeColor = INK, mouthColor = INK } = {}) {
   return `
     <g class="expr-group expr-neutral">
-      <circle cx="${cx - 12}" cy="${cy - 4}" r="4" fill="${eyeColor}" />
-      <circle cx="${cx + 12}" cy="${cy - 4}" r="4" fill="${eyeColor}" />
+      <circle class="mascota-eye" cx="${cx - 12}" cy="${cy - 4}" r="4" fill="${eyeColor}" />
+      <circle class="mascota-eye" cx="${cx + 12}" cy="${cy - 4}" r="4" fill="${eyeColor}" />
       <path d="M ${cx - 7} ${cy + 11} H ${cx + 7}" stroke="${mouthColor}" stroke-width="3" stroke-linecap="round" fill="none" />
     </g>
     <g class="expr-group expr-feliz">

@@ -155,6 +155,29 @@ export function recordRetoFinalSuccess(tableId) {
   return { justUnlockedNextBase, justUnlockedExtra };
 }
 
+// Marca como completadas todas las tablas anteriores a tableId y desbloquea
+// tableId, sin jugar. Pensado para un enlace de acceso directo (ver
+// app-core.js), no se expone en ninguna pantalla del juego.
+export function forceUnlockThrough(tableId) {
+  const s = load();
+  const id = Number(tableId);
+  const idx = BASE_TABLE_IDS.indexOf(id);
+  if (idx === -1) return;
+  for (let i = 0; i < idx; i++) {
+    const priorId = BASE_TABLE_IDS[i];
+    const t = s.tables[priorId];
+    for (const key of GAME_KEYS) {
+      t[key].played = true;
+      t[key].bestScore = 10;
+    }
+    t.retoFinal.completed = true;
+    if (!t.retoFinal.completedAt) t.retoFinal.completedAt = new Date().toISOString();
+    if (!s.unlockedBase.includes(priorId)) s.unlockedBase.push(priorId);
+  }
+  if (!s.unlockedBase.includes(id)) s.unlockedBase.push(id);
+  save();
+}
+
 export function resetAllProgress() {
   memoryState = defaultState();
   save();

@@ -3,7 +3,20 @@
 import { registerRoute, startRouter } from './ui/router.js';
 import { initSpeech, unlockSpeech } from './engine/speech.js';
 import { unlockAudio } from './engine/audio.js';
+import { forceUnlockThrough } from './engine/state.js';
 import * as screens from './ui/screens.js';
+
+// Enlace de acceso directo: abrir la app con ?desbloquear=6 marca las tablas
+// anteriores como completadas y deja jugable la tabla indicada, sin jugar.
+function applyUnlockLinkIfPresent() {
+  const params = new URLSearchParams(window.location.search);
+  const target = params.get('desbloquear');
+  if (!target) return;
+  forceUnlockThrough(Number(target));
+  const url = new URL(window.location.href);
+  url.searchParams.delete('desbloquear');
+  window.history.replaceState({}, '', url);
+}
 
 export function initApp({ theme, characterRenderer } = {}) {
   const root = document.getElementById('app');
@@ -12,6 +25,7 @@ export function initApp({ theme, characterRenderer } = {}) {
 
   const ctx = { theme, characterRenderer: characterRenderer || null };
 
+  applyUnlockLinkIfPresent();
   initSpeech();
 
   let unlocked = false;

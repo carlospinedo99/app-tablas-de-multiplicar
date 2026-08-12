@@ -1,0 +1,46 @@
+/* Paleta y tipografía de la versión Animada: cálida, lúdica, con mascotas por tabla. */
+:root {
+  --font-family: -apple-system, 'SF Pro Rounded', 'Nunito', sans-serif;
+
+  --color-bg: #fff5f8;
+  --color-surface: #ffffff;
+  --color-text: #3a2f5c;
+  --color-text-muted: #7a6f96;
+
+  --color-primary: #ff6fa5;
+  --color-on-primary: #ffffff;
+  --color-accent: #ffa36f;
+
+  --color-success: #2ecc71;
+  --color-success-bg: #e8fbf0;
+  --color-warn: #f5a623;
+  --color-error: #ff6b6b;
+
+  --color-node-locked: #ffd9e6;
+}
+
+/* Alterna las 4 expresiones de cada mascota según el data-expr del <svg>,
+   sin volver a renderizar el DOM (ver personajes/face.js). */
+.mascota .expr-group { display: none; }
+.mascota[data-expr='neutral'] .expr-neutral,
+.mascota[data-expr='feliz'] .expr-feliz,
+.mascota[data-expr='triste'] .expr-triste,
+.mascota[data-expr='celebrando'] .expr-celebrando {
+  display: inline;
+}
+
+.mascota { display: block; transition: transform 0.25s ease; }
+.mascota[data-expr='feliz'] { animation: mascota-bounce 0.5s ease; }
+.mascota[data-expr='triste'] { animation: mascota-shake 0.4s ease; }
+.mascota[data-expr='celebrando'] { animation: mascota-bounce 0.6s ease infinite alternate; }
+
+@keyframes mascota-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes mascota-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25% { transform: translateX(-4px) rotate(-4deg); }
+  75% { transform: translateX(4px) rotate(4deg); }
+}

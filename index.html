@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tablas de Camila</title>
+  <meta name="description" content="Elige tu versión favorita para aprender las tablas de multiplicar." />
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, 'SF Pro Rounded', 'Nunito', sans-serif;
+      background: linear-gradient(160deg, #fff5f8 0%, #f5f3ff 100%);
+      color: #3a2f5c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .wrap { max-width: 480px; width: 100%; text-align: center; }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; }
+    p.sub { color: #7a6f96; margin: 0 0 28px; }
+    .cards { display: flex; flex-direction: column; gap: 18px; }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 6px 16px rgba(58, 47, 92, 0.12);
+      transition: transform 0.15s ease;
+    }
+    a.card:active { transform: scale(0.97); }
+    .emoji { font-size: 2.6rem; display: block; margin-bottom: 10px; }
+    .card h2 { margin: 0 0 4px; font-size: 1.25rem; }
+    .card p { margin: 0; color: #7a6f96; font-size: 0.95rem; }
+    .clasica h2 { color: #6c5ce7; }
+    .animada h2 { color: #ff6fa5; }
+    footer { margin-top: 28px; font-size: 0.8rem; color: #a89fc2; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Tablas de Camila 🧮</h1>
+    <p class="sub">Elige cómo quieres practicar hoy</p>
+    <div class="cards">
+      <a class="card clasica" href="clasica/index.html">
+        <span class="emoji">✨</span>
+        <h2>Versión Clásica</h2>
+        <p>Colores alegres y directo al juego</p>
+      </a>
+      <a class="card animada" href="animada/index.html">
+        <span class="emoji">🦄</span>
+        <h2>Versión Animada</h2>
+        <p>Con una mascota tierna en cada tabla</p>
+      </a>
+    </div>
+    <footer>Toca "Compartir" → "Agregar a inicio" en Safari para instalarla</footer>
+  </div>
+</body>
+</html>

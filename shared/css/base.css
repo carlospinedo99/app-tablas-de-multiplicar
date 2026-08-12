@@ -1,0 +1,427 @@
+/* Layout, componentes y animaciones compartidos por Clásica y Animada.
+   Cada versión define sus propias variables de color en theme-*.css. */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-family, -apple-system, 'SF Pro Rounded', 'Nunito', sans-serif);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+#app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) 14px 12px;
+  gap: 8px;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.header-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-spacer { width: 44px; height: 44px; }
+
+.top-actions {
+  display: flex;
+  justify-content: center;
+  padding: 0 14px 8px;
+}
+
+/* ---------- Botones genéricos ---------- */
+.btn {
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 0.08s ease;
+}
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12); }
+
+.btn-primary { background: var(--color-primary); color: var(--color-on-primary, #fff); }
+.btn-secondary { background: var(--color-surface); color: var(--color-primary); }
+
+/* ---------- Mapa de niveles ---------- */
+.screen {
+  flex: 1;
+  padding: 8px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.level-map {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  max-width: 480px;
+  width: 100%;
+  padding-top: 12px;
+}
+
+.level-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: 24px;
+  background: var(--color-surface);
+}
+
+.level-node .node-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: var(--color-node-locked);
+}
+
+.level-node.state-active .node-badge {
+  background: var(--color-primary);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.level-node.state-completed .node-badge {
+  background: var(--color-success);
+}
+
+.level-node .node-label {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.level-node .node-check {
+  position: absolute;
+  top: 2px;
+  right: 10px;
+  background: var(--color-success);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.level-node:disabled { opacity: 0.55; }
+.lock-icon { font-size: 1.5rem; }
+
+/* ---------- Práctica libre / grilla de tarjetas ---------- */
+.libre-hint {
+  text-align: center;
+  color: var(--color-text-muted, #666);
+  max-width: 420px;
+  margin: 4px 0 16px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.game-card, .table-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.game-card:disabled { opacity: 0.5; }
+
+.game-card-title { font-weight: 800; font-size: 1rem; }
+.game-card-diff {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+.diff-facil { background: var(--color-success); }
+.diff-medio { background: var(--color-warn, #f5a623); }
+.diff-dificil { background: var(--color-error); }
+
+.game-card-score, .game-card-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, #666);
+}
+
+.reto-card { border: 2px solid var(--color-accent); }
+.reto-card.is-completed { background: var(--color-success-bg, #e9f9ee); }
+
+/* ---------- Hub de tabla ---------- */
+.hub-screen { gap: 14px; }
+.hub-character .character-slot { width: 140px; height: 140px; margin: 0 auto 8px; }
+
+/* ---------- Pantalla de juego ---------- */
+.game-screen {
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.character-slot { display: flex; align-items: center; justify-content: center; }
+.character-slot.size-sm { width: 48px; height: 48px; }
+.character-slot.size-md { width: 96px; height: 96px; margin: 0 auto; }
+.character-slot.size-lg { width: 120px; height: 120px; margin: 0 auto; }
+.character-slot.size-xl { width: 150px; height: 150px; margin: 0 auto; }
+.character-slot svg { width: 100%; height: 100%; }
+
+.character-slot.generic .generic-badge {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.6rem;
+  background: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+}
+
+.game-progress {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-text-muted, #666);
+  margin: 0;
+}
+
+.operation-text {
+  text-align: center;
+  font-size: 2.4rem;
+  font-weight: 900;
+  margin: 6px 0;
+  color: var(--color-text);
+}
+
+/* ---------- Array visual (Juego 1) ---------- */
+.array-grid {
+  display: grid;
+  gap: 8px;
+  max-width: 300px;
+  width: 100%;
+  margin: 12px auto 16px;
+  padding: 14px;
+  background: var(--color-surface);
+  border-radius: 20px;
+}
+.array-dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-primary);
+  min-width: 20px;
+  min-height: 20px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- Opciones múltiples ---------- */
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.choice-btn {
+  padding: 20px 10px;
+  border-radius: 20px;
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: var(--color-surface);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.choice-btn.is-disabled { pointer-events: none; }
+.choice-btn.is-correct, .choice-btn.is-correct-reveal { background: var(--color-success); color: #fff; animation: pop 0.35s ease; }
+.choice-btn.is-incorrect { background: var(--color-error); color: #fff; animation: shake 0.4s ease; }
+
+/* ---------- Teclado numérico ---------- */
+.answer-display {
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 900;
+  min-height: 3.2rem;
+  color: var(--color-primary);
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.keypad-btn {
+  padding: 18px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.keypad-submit { background: var(--color-success); color: #fff; }
+.keypad-delete { background: var(--color-error); color: #fff; }
+
+/* ---------- Timer suave ---------- */
+.timer-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.timer-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--color-success);
+  border-radius: 999px;
+  transition: background-color 0.3s ease;
+}
+.timer-bar-fill.timer-warn { background: var(--color-warn, #f5a623); }
+.timer-bar-fill.timer-low { background: var(--color-error); }
+
+/* ---------- Overlays de feedback ---------- */
+.feedback-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 50;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+
+.feedback-card {
+  background: var(--color-bg);
+  border-radius: 28px;
+  padding: 28px 24px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: pop 0.35s ease;
+}
+
+.feedback-icon { font-size: 3rem; }
+.feedback-title { font-size: 1.4rem; font-weight: 900; }
+.feedback-message { color: var(--color-text-muted, #666); }
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.confetti-piece {
+  position: absolute;
+  top: -10%;
+  width: 10px;
+  height: 16px;
+  border-radius: 3px;
+  animation: confetti-fall 2.4s linear infinite;
+}
+.piece-0 { left: 5%; background: #ff6b6b; animation-delay: 0s; }
+.piece-1 { left: 20%; background: #ffd93d; animation-delay: 0.3s; }
+.piece-2 { left: 38%; background: #6bcB77; animation-delay: 0.6s; }
+.piece-3 { left: 55%; background: #4d96ff; animation-delay: 0.15s; }
+.piece-4 { left: 72%; background: #c17fff; animation-delay: 0.45s; }
+.piece-5 { left: 88%; background: #ff9f4d; animation-delay: 0.75s; }
+
+/* ---------- Animaciones ---------- */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
+}
+
+/* Expresiones de personaje/mascota genérica según data-expr */
+.generic-badge.expr-triste { background: var(--color-error); }
+.generic-badge.expr-feliz, .generic-badge.expr-celebrando { background: var(--color-success); }
+
+@media (min-width: 480px) {
+  .level-map { grid-template-columns: repeat(4, 1fr); }
+}

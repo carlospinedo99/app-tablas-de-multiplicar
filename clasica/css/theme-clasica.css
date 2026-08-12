@@ -1,0 +1,20 @@
+/* Paleta y tipografía de la versión Clásica: limpia, alegre, sin mascotas por tabla. */
+:root {
+  --font-family: -apple-system, 'SF Pro Rounded', 'Nunito', sans-serif;
+
+  --color-bg: #f5f3ff;
+  --color-surface: #ffffff;
+  --color-text: #2b2350;
+  --color-text-muted: #6b6289;
+
+  --color-primary: #6c5ce7;
+  --color-on-primary: #ffffff;
+  --color-accent: #a29bfe;
+
+  --color-success: #2ecc71;
+  --color-success-bg: #e8fbf0;
+  --color-warn: #f5a623;
+  --color-error: #ff6b6b;
+
+  --color-node-locked: #d9d5f5;
+}

@@ -2,7 +2,7 @@
 // initApp({ theme, characterRenderer }) — characterRenderer es null en Clásica.
 import { registerRoute, startRouter } from './ui/router.js';
 import { initSpeech, unlockSpeech } from './engine/speech.js';
-import { unlockAudio } from './engine/audio.js';
+import { unlockAudio, playToqueSuave } from './engine/audio.js';
 import { startMusic } from './engine/music.js';
 import { forceUnlockThrough, getSettings } from './engine/state.js';
 import * as screens from './ui/screens.js';
@@ -38,6 +38,13 @@ export function initApp({ theme, characterRenderer } = {}) {
     if (!getSettings().audioMuted) startMusic();
     window.removeEventListener('pointerdown', unlockOnce);
   });
+
+  // Toque suave en CUALQUIER botón de la app. En fase de captura para que
+  // suene antes que el efecto de acierto/error que el propio botón dispare
+  // (si no, el orden se sentía invertido: primero el resultado, luego el tap).
+  document.addEventListener('click', event => {
+    if (event.target.closest('button')) playToqueSuave();
+  }, true);
 
   registerRoute('/', params => screens.renderMapa(root, params, ctx));
   registerRoute('/libre', params => screens.renderLibre(root, params, ctx));

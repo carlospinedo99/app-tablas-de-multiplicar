@@ -18,7 +18,7 @@ import {
   startRetoFinal, answerRetoFinal, buildMixedReviewRound,
 } from '../engine/questions.js';
 import { createSoftTimer } from '../engine/timer.js';
-import { playCorrecto, playIncorrecto, playToqueSuave } from '../engine/audio.js';
+import { playCorrecto, playIncorrecto } from '../engine/audio.js';
 import { speakOperacion, speakResultado } from '../engine/speech.js';
 
 function tableExists(id) {
@@ -122,7 +122,7 @@ export function renderRepasoMixto(root, params, ctx) {
   function handleKey(key) {
     if (key === '⌫') currentInput = currentInput.slice(0, -1);
     else if (key === '✓') { if (currentInput !== '') submitAnswer(); return; }
-    else { if (currentInput.length >= 3) return; currentInput += key; playToqueSuave(); }
+    else { if (currentInput.length >= 3) return; currentInput += key; }
     updateDisplay();
   }
 
@@ -400,7 +400,7 @@ export function renderJuego3(root, params, ctx) {
   function handleKey(key) {
     if (key === '⌫') currentInput = currentInput.slice(0, -1);
     else if (key === '✓') { if (currentInput !== '') submitAnswer(); return; }
-    else { if (currentInput.length >= 3) return; currentInput += key; playToqueSuave(); }
+    else { if (currentInput.length >= 3) return; currentInput += key; }
     updateDisplay();
   }
 
@@ -489,7 +489,7 @@ export function renderRetoFinal(root, params, ctx) {
   function handleKey(key) {
     if (key === '⌫') currentInput = currentInput.slice(0, -1);
     else if (key === '✓') { if (currentInput !== '') submitAnswer(); return; }
-    else { if (currentInput.length >= 3) return; currentInput += key; playToqueSuave(); }
+    else { if (currentInput.length >= 3) return; currentInput += key; }
     updateDisplay();
   }
 

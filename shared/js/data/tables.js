@@ -1,9 +1,9 @@
 // Metadatos estáticos de las 12 tablas de multiplicar.
 // characterId se usa solo en la versión Animada (registry en animada/js/personajes/index.js).
 export const TABLES = [
-  { id: 1, label: 'Tabla del 1', characterId: 'princesa', unlockGroup: 'base' },
+  { id: 1, label: 'Tabla del 1', characterId: 'gatitos', unlockGroup: 'base' },
   { id: 2, label: 'Tabla del 2', characterId: 'leon', unlockGroup: 'base' },
-  { id: 3, label: 'Tabla del 3', characterId: 'gatitos', unlockGroup: 'base' },
+  { id: 3, label: 'Tabla del 3', characterId: 'princesa', unlockGroup: 'base' },
   { id: 4, label: 'Tabla del 4', characterId: 'perritos', unlockGroup: 'base' },
   { id: 5, label: 'Tabla del 5', characterId: 'corazones', unlockGroup: 'base' },
   { id: 6, label: 'Tabla del 6', characterId: 'caritas', unlockGroup: 'base' },

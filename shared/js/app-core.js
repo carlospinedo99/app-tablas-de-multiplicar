@@ -41,6 +41,7 @@ export function initApp({ theme, characterRenderer } = {}) {
 
   registerRoute('/', params => screens.renderMapa(root, params, ctx));
   registerRoute('/libre', params => screens.renderLibre(root, params, ctx));
+  registerRoute('/libre/mixto', params => screens.renderRepasoMixto(root, params, ctx));
   registerRoute('/tabla/:id', params => screens.renderHub(root, params, ctx));
   registerRoute('/tabla/:id/juego1', params => screens.renderJuego1(root, params, ctx));
   registerRoute('/tabla/:id/juego2', params => screens.renderJuego2(root, params, ctx));

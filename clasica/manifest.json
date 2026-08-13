@@ -1,6 +1,6 @@
 {
-  "name": "Tablas de Camila - Clásica",
-  "short_name": "Tablas Camila",
+  "name": "Multitablas - Clásica",
+  "short_name": "Multitablas",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

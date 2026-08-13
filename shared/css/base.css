@@ -178,6 +178,27 @@ button {
   margin: 4px 0 16px;
 }
 
+.mixed-review-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 480px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  border-radius: 20px;
+  background: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  transition: transform 0.12s ease;
+}
+.mixed-review-card:active { transform: scale(0.97); }
+.mixed-review-icon { font-size: 1.8rem; }
+.mixed-review-text { display: flex; flex-direction: column; gap: 2px; }
+.mixed-review-title { font-weight: 800; font-size: 1.05rem; }
+.mixed-review-sub { font-size: 0.82rem; opacity: 0.9; }
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

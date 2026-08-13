@@ -32,9 +32,9 @@ export function buildChoices(question, count) {
   return shuffle(Array.from(choices));
 }
 
-// ---- Juego 1 (Descubre): opción múltiple con apoyo visual, sin repetición forzada ----
+// ---- Juego 1 (Descubre): opción múltiple con apoyo visual, en orden (×1 a ×10) ----
 export function buildJuego1Round(tableId) {
-  return shuffle(buildAllTenQuestions(tableId)).map(q => ({
+  return buildAllTenQuestions(tableId).map(q => ({
     ...q,
     choices: buildChoices(q, 3),
   }));
@@ -62,6 +62,15 @@ export function advanceQueue(remainingQueue, wasCorrect, question) {
 // ---- Juego 3 (Desafío rápido): ronda de 10, orden aleatorio, respuesta escrita ----
 export function buildJuego3Round(tableId) {
   return shuffle(buildAllTenQuestions(tableId));
+}
+
+// ---- Repaso mixto (Práctica libre): mezcla preguntas de varias tablas ----
+export function buildMixedReviewRound(tableIds, size = 15) {
+  const pool = [];
+  for (const tableId of tableIds) {
+    for (const f of FACTORS) pool.push(buildQuestion(tableId, f));
+  }
+  return shuffle(pool).slice(0, Math.min(size, pool.length));
 }
 
 // ---- Reto Final: cero errores permitidos, reinicio total ante fallo ----

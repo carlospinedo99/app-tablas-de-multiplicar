@@ -1,6 +1,6 @@
 {
-  "name": "Tablas de Camila - Animada",
-  "short_name": "Tablas Camila+",
+  "name": "Multitablas - Animada",
+  "short_name": "Multitablas+",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

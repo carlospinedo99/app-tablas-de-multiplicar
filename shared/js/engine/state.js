@@ -1,4 +1,4 @@
-// Persistencia y reglas de negocio del progreso de Camila.
+// Persistencia y reglas de negocio del progreso de quien esté jugando.
 // Un único objeto en localStorage, versionado para poder migrar sin perder progreso.
 import { BASE_TABLE_IDS, EXTRA_TABLE_IDS, GAME_KEYS } from '../data/tables.js';
 
@@ -111,6 +111,15 @@ export function isTableUnlocked(tableId) {
   if (BASE_TABLE_IDS.includes(id)) return s.unlockedBase.includes(id);
   if (EXTRA_TABLE_IDS.includes(id)) return s.unlockedExtra;
   return false;
+}
+
+// Todas las tablas desbloqueadas en este momento, en orden. Se usa para el
+// Repaso mixto de Práctica libre: el conjunto queda fijo al presionar el
+// botón, no cambia si se desbloquea algo más durante la ronda.
+export function getUnlockedTableIds() {
+  const s = load();
+  const extra = s.unlockedExtra ? EXTRA_TABLE_IDS : [];
+  return [...s.unlockedBase, ...extra];
 }
 
 export function getTableProgress(tableId) {

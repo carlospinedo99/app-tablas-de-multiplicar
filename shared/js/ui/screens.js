@@ -11,10 +11,11 @@ import {
 import {
   isTableUnlocked, getTableProgress, canAttemptRetoFinal, isTableCompleted,
   recordJuegoResult, recordRetoFinalSuccess, recordRetoFinalAttemptFailed,
+  getUnlockedTableIds,
 } from '../engine/state.js';
 import {
   buildJuego1Round, buildJuego2Queue, buildJuego3Round, advanceQueue,
-  startRetoFinal, answerRetoFinal,
+  startRetoFinal, answerRetoFinal, buildMixedReviewRound,
 } from '../engine/questions.js';
 import { createSoftTimer } from '../engine/timer.js';
 import { playCorrecto, playIncorrecto, playToqueSuave } from '../engine/audio.js';
@@ -30,7 +31,7 @@ function tableExists(id) {
 export function renderMapa(root, params, ctx) {
   const nodes = TABLES.map(t => levelNodeHtml(t, ctx)).join('');
   root.innerHTML = `
-    ${headerHtml({ title: 'Tablas de Camila', showBack: false })}
+    ${headerHtml({ title: 'Multitablas', showBack: false })}
     <nav class="top-actions">
       <button class="btn btn-secondary" data-action="libre">🎯 Práctica libre</button>
     </nav>
@@ -66,6 +67,13 @@ export function renderLibre(root, params, ctx) {
     ${headerHtml({ title: 'Práctica libre' })}
     <main class="screen libre-screen">
       <p class="libre-hint">Elige una tabla para practicar sin presión. No afecta tu progreso de niveles.</p>
+      <button class="mixed-review-card" data-action="mixto">
+        <span class="mixed-review-icon">🔀</span>
+        <span class="mixed-review-text">
+          <span class="mixed-review-title">Repaso mixto</span>
+          <span class="mixed-review-sub">Un poco de todas las tablas que ya desbloqueaste</span>
+        </span>
+      </button>
       <div class="card-grid">
         ${available.map(t => `
           <button class="game-card table-pick" data-action="open-table" data-id="${t.id}">
@@ -75,9 +83,88 @@ export function renderLibre(root, params, ctx) {
       </div>
     </main>`;
   wireHeader(root, { backHref: '/' });
+  root.querySelector('[data-action="mixto"]').addEventListener('click', () => navigate('/libre/mixto'));
   root.querySelectorAll('[data-action="open-table"]').forEach(btn => {
     btn.addEventListener('click', () => navigate(`/tabla/${btn.dataset.id}`));
   });
+}
+
+// ---------------------------------------------------------------------------
+// Repaso mixto: dentro de Práctica libre, mezcla todas las tablas ya
+// desbloqueadas (el conjunto se fija al abrir esta pantalla). No afecta
+// el progreso de niveles.
+// ---------------------------------------------------------------------------
+export function renderRepasoMixto(root, params, ctx) {
+  const questions = buildMixedReviewRound(getUnlockedTableIds());
+  const myEpoch = getEpoch();
+  let index = 0;
+  let correctCount = 0;
+  let currentInput = '';
+  let answering = true;
+
+  root.innerHTML = `
+    ${headerHtml({ title: 'Repaso mixto' })}
+    <main class="screen game-screen">
+      <div data-role="character-container"></div>
+      <p class="game-progress">Pregunta <span data-role="progress-current">1</span>/${questions.length}</p>
+      <p class="operation-text" data-role="operation"></p>
+      <div class="answer-display" data-role="answer-display">&nbsp;</div>
+      ${keypadHtml()}
+    </main>`;
+  wireHeader(root, { backHref: '/libre' });
+
+  root.querySelector('.keypad').addEventListener('click', (e) => {
+    const btn = e.target.closest('.keypad-btn');
+    if (!btn || !answering) return;
+    handleKey(btn.dataset.key);
+  });
+
+  function handleKey(key) {
+    if (key === '⌫') currentInput = currentInput.slice(0, -1);
+    else if (key === '✓') { if (currentInput !== '') submitAnswer(); return; }
+    else { if (currentInput.length >= 3) return; currentInput += key; playToqueSuave(); }
+    updateDisplay();
+  }
+
+  function updateDisplay() {
+    root.querySelector('[data-role="answer-display"]').textContent = currentInput || ' ';
+  }
+
+  function renderQuestion() {
+    currentInput = '';
+    updateDisplay();
+    const q = questions[index];
+    root.querySelector('[data-role="progress-current"]').textContent = String(index + 1);
+    root.querySelector('[data-role="operation"]').textContent = `${q.a} × ${q.b} = ?`;
+    root.querySelector('[data-role="character-container"]').innerHTML = characterSlotHtml(ctx, q.a, 'neutral', 'md');
+    answering = true;
+    speakOperacion(q.a, q.b);
+  }
+
+  function submitAnswer() {
+    if (!answering || getEpoch() !== myEpoch) return;
+    answering = false;
+    const q = questions[index];
+    const value = Number(currentInput);
+    const correct = value === q.answer;
+    if (correct) correctCount++;
+    setCharacterExpression(root, correct ? 'feliz' : 'triste');
+    correct ? playCorrecto() : playIncorrecto();
+    speakResultado(q.a, q.b, q.answer, correct);
+    root.querySelector('[data-role="answer-display"]').textContent = correct ? `¡${q.answer}! ✔` : `Era ${q.answer}`;
+    setTimeout(() => {
+      if (getEpoch() !== myEpoch) return;
+      index++;
+      if (index < questions.length) renderQuestion();
+      else finishRound();
+    }, 1400);
+  }
+
+  function finishRound() {
+    showRoundSummary(root, { correctCount, total: questions.length, nextHref: '/libre' });
+  }
+
+  renderQuestion();
 }
 
 // ---------------------------------------------------------------------------
@@ -331,7 +418,7 @@ export function renderJuego3(root, params, ctx) {
     answering = true;
     timer?.stop();
     timer = createSoftTimer({
-      durationMs: 9000,
+      durationMs: 11000,
       onTick: fraction => { if (getEpoch() === myEpoch) updateTimerBar(root, fraction); },
       onTimeout: () => submitAnswer(true),
     });

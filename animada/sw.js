@@ -1,6 +1,6 @@
-// Service worker de la versión Animada: cachea el app shell (incluidos los
-// personajes SVG) para uso 100% offline.
-const CACHE_NAME = 'tablas-camila-animada-v4';
+// Service worker de la versión Animada: cachea el app shell (incluidas las
+// imágenes de personajes) para uso 100% offline.
+const CACHE_NAME = 'tablas-camila-animada-v5';
 
 const PERSONAJES = [
   '01-princesa', '02-leon', '03-gatitos', '04-perritos', '05-corazones',

@@ -19,29 +19,17 @@
   --color-node-locked: #ffd9e6;
 }
 
-/* Alterna las 4 expresiones de cada mascota según el data-expr del <svg>,
-   sin volver a renderizar el DOM (ver personajes/face.js). */
-.mascota .expr-group { display: none; }
-.mascota[data-expr='neutral'] .expr-neutral,
-.mascota[data-expr='feliz'] .expr-feliz,
-.mascota[data-expr='triste'] .expr-triste,
-.mascota[data-expr='celebrando'] .expr-celebrando {
-  display: inline;
-}
-
+/* La mascota es un <img> cuyo src cambia entre las 4 expresiones (ver
+   personajes/index.js y components.js:setCharacterExpression) — el
+   data-expr solo dispara la animación correspondiente. */
 .mascota { display: block; transition: transform 0.25s ease; }
 .mascota[data-expr='feliz'] { animation: mascota-bounce 0.5s ease; }
 .mascota[data-expr='triste'] { animation: mascota-shake 0.4s ease; }
 .mascota[data-expr='celebrando'] { animation: mascota-celebra 0.7s ease infinite alternate; }
 
-/* Vida propia en reposo: respira suave y parpadea de vez en cuando, no
-   queda congelada esperando la siguiente respuesta. */
+/* Vida propia en reposo: respira suave, no queda congelada esperando la
+   siguiente respuesta. */
 .mascota[data-expr='neutral'] { animation: idle-breathe 3.4s ease-in-out infinite; }
-.mascota[data-expr='neutral'] .mascota-eye {
-  animation: mascota-blink 4.6s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
 
 @keyframes mascota-bounce {
   0% { transform: scale(1); }
@@ -58,14 +46,8 @@
   25% { transform: translateX(-4px) rotate(-4deg); }
   75% { transform: translateX(4px) rotate(4deg); }
 }
-@keyframes mascota-blink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .mascota[data-expr='neutral'],
-  .mascota[data-expr='neutral'] .mascota-eye,
   .mascota[data-expr='celebrando'] {
     animation: none;
   }

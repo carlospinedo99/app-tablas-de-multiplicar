@@ -57,8 +57,12 @@ export function characterSlotHtml(ctx, tableId, expression, size = 'lg') {
 export function setCharacterExpression(root, expression) {
   const slot = root.querySelector('.character-slot');
   if (!slot) return;
-  const svg = slot.querySelector('svg');
-  if (svg) svg.setAttribute('data-expr', expression);
+  const img = slot.querySelector('img.mascota');
+  if (img) {
+    const folder = img.getAttribute('src').replace(/\/[^/]+\.png$/, '');
+    img.setAttribute('src', `${folder}/${expression}.png`);
+    img.setAttribute('data-expr', expression);
+  }
   slot.setAttribute('data-expr', expression);
 }
 

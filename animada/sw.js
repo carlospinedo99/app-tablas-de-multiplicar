@@ -1,6 +1,16 @@
 // Service worker de la versión Animada: cachea el app shell (incluidos los
 // personajes SVG) para uso 100% offline.
-const CACHE_NAME = 'tablas-camila-animada-v3';
+const CACHE_NAME = 'tablas-camila-animada-v4';
+
+const PERSONAJES = [
+  '01-princesa', '02-leon', '03-gatitos', '04-perritos', '05-corazones',
+  '06-caritas', '07-solecitos', '08-unicornio', '09-capibaras',
+  '10-estrellitas', '11-hadas', '12-delfines',
+];
+const EXPRESIONES = ['neutral', 'feliz', 'triste', 'celebrando'];
+const PERSONAJE_IMG_URLS = PERSONAJES.flatMap(folder =>
+  EXPRESIONES.map(expr => `./img/personajes/${folder}/${expr}.png`)
+);
 
 const PRECACHE_URLS = [
   './',
@@ -9,20 +19,7 @@ const PRECACHE_URLS = [
   './css/theme-animada.css',
   './js/main.js',
   './js/personajes/index.js',
-  './js/personajes/base.js',
-  './js/personajes/face.js',
-  './js/personajes/princesa.js',
-  './js/personajes/leon.js',
-  './js/personajes/gatitos.js',
-  './js/personajes/perritos.js',
-  './js/personajes/corazones.js',
-  './js/personajes/caritas.js',
-  './js/personajes/solecitos.js',
-  './js/personajes/unicornio.js',
-  './js/personajes/capibaras.js',
-  './js/personajes/estrellitas.js',
-  './js/personajes/hadas.js',
-  './js/personajes/delfines.js',
+  ...PERSONAJE_IMG_URLS,
   './icons/apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

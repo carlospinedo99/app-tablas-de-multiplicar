@@ -1,2 +1,7 @@
 .DS_Store
 **/.DS_Store
+
+# Material de trabajo para generar arte con IA (fotos de referencia, grids de
+# expresiones sin recortar). Los assets finales usados por la app viven en
+# animada/img/personajes/.
+animaciones/

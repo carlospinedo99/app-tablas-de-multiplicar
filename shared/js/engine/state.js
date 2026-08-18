@@ -3,7 +3,11 @@
 import { BASE_TABLE_IDS, EXTRA_TABLE_IDS, GAME_KEYS } from '../data/tables.js';
 
 const STORAGE_KEY = 'tablasCamila.progress.v1';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
+
+// Calificación mínima (sobre 10) para desbloquear la siguiente dificultad
+// dentro de una misma tabla: Fácil (juego1) → Medio (juego2) → Difícil (juego3).
+const PASS_THRESHOLD = 7;
 
 function emptyTableProgress() {
   return {
@@ -24,7 +28,17 @@ function defaultState() {
     unlockedBase: [1],
     unlockedExtra: false,
     tables,
-    settings: { voiceMuted: false, voiceEnabled: true, audioMuted: false, preferredVoiceURI: null },
+    settings: {
+      voiceMuted: false,
+      voiceEnabled: true,
+      audioMuted: false,
+      preferredVoiceURI: null,
+      dificilTimeMs: 11000,
+      retoTimeMs: 9000,
+      // null = sin tope manual: progreso normal (fácil→difícil→Reto Final,
+      // tabla por tabla) sin intervención del adulto.
+      maxUnlockedTable: null,
+    },
   };
 }
 
@@ -44,10 +58,17 @@ function migrate(data) {
       voiceEnabled: data.settings?.voiceEnabled ?? true,
       preferredVoiceURI: data.settings?.preferredVoiceURI ?? null,
     };
-    data.schemaVersion = SCHEMA_VERSION;
-    return data;
+    data.schemaVersion = 2;
   }
-  return defaultState();
+  if (data.schemaVersion === 2) {
+    // v2 no tenía ajustes de tiempo de respuesta ni tope de tablas
+    // desbloqueables (ambos configurables ahora desde Ajustes).
+    data.settings.dificilTimeMs = data.settings.dificilTimeMs ?? 11000;
+    data.settings.retoTimeMs = data.settings.retoTimeMs ?? 9000;
+    data.settings.maxUnlockedTable = data.settings.maxUnlockedTable ?? null;
+    data.schemaVersion = 3;
+  }
+  return data;
 }
 
 function load() {
@@ -105,10 +126,60 @@ export function setPreferredVoice(voiceURI) {
   save();
 }
 
+export function getDificilTimeMs() {
+  return load().settings.dificilTimeMs;
+}
+
+export function setDificilTimeMs(ms) {
+  const s = load();
+  s.settings.dificilTimeMs = ms;
+  save();
+  return s.settings;
+}
+
+export function getRetoTimeMs() {
+  return load().settings.retoTimeMs;
+}
+
+export function setRetoTimeMs(ms) {
+  const s = load();
+  s.settings.retoTimeMs = ms;
+  save();
+  return s.settings;
+}
+
+export function getMaxUnlockedTable() {
+  return load().settings.maxUnlockedTable;
+}
+
+// El adulto elige directamente hasta qué tabla queda jugable (sin exigir
+// haber completado las anteriores). El progreso ganado por juego normal
+// (unlockedBase) se conserva aparte y nunca se oculta si luego baja el tope.
+export function setMaxUnlockedTable(maxTable) {
+  const s = load();
+  s.settings.maxUnlockedTable = maxTable;
+  save();
+  return s.settings;
+}
+
+// Dentro de una tabla, Fácil siempre está disponible; Medio y Difícil se
+// ganan superando el juego anterior con más de PASS_THRESHOLD (sobre 10).
+export function isJuegoUnlocked(tableId, juegoKey) {
+  const t = getTableProgress(tableId);
+  if (!t) return false;
+  if (juegoKey === 'juego1') return true;
+  if (juegoKey === 'juego2') return t.juego1.bestScore > PASS_THRESHOLD;
+  if (juegoKey === 'juego3') return t.juego2.bestScore > PASS_THRESHOLD;
+  return false;
+}
+
 export function isTableUnlocked(tableId) {
   const s = load();
   const id = Number(tableId);
-  if (BASE_TABLE_IDS.includes(id)) return s.unlockedBase.includes(id);
+  if (BASE_TABLE_IDS.includes(id)) {
+    const cap = s.settings.maxUnlockedTable;
+    return s.unlockedBase.includes(id) || (cap != null && id <= cap);
+  }
   if (EXTRA_TABLE_IDS.includes(id)) return s.unlockedExtra;
   return false;
 }
@@ -118,8 +189,10 @@ export function isTableUnlocked(tableId) {
 // botón, no cambia si se desbloquea algo más durante la ronda.
 export function getUnlockedTableIds() {
   const s = load();
+  const cap = s.settings.maxUnlockedTable;
+  const base = BASE_TABLE_IDS.filter(id => s.unlockedBase.includes(id) || (cap != null && id <= cap));
   const extra = s.unlockedExtra ? EXTRA_TABLE_IDS : [];
-  return [...s.unlockedBase, ...extra];
+  return [...base, ...extra];
 }
 
 export function getTableProgress(tableId) {
@@ -168,7 +241,8 @@ export function recordRetoFinalSuccess(tableId) {
   if (BASE_TABLE_IDS.includes(id)) {
     const idx = BASE_TABLE_IDS.indexOf(id);
     const next = BASE_TABLE_IDS[idx + 1];
-    if (next && !s.unlockedBase.includes(next)) {
+    const cap = s.settings.maxUnlockedTable ?? BASE_TABLE_IDS.length;
+    if (next && next <= cap && !s.unlockedBase.includes(next)) {
       s.unlockedBase.push(next);
       justUnlockedNextBase = next;
     }

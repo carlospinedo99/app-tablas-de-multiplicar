@@ -6,12 +6,14 @@ import {
   showRoundSummary, showGrowthMindsetOverlay, showTableCompletedOverlay,
 } from './components.js';
 import {
-  TABLES, GAME_META, getTableMeta,
+  TABLES, GAME_META, FACTORS, BASE_TABLE_IDS, getTableMeta,
 } from '../data/tables.js';
 import {
   isTableUnlocked, getTableProgress, canAttemptRetoFinal, isTableCompleted,
   recordJuegoResult, recordRetoFinalSuccess, recordRetoFinalAttemptFailed,
-  getUnlockedTableIds,
+  getUnlockedTableIds, isJuegoUnlocked,
+  getDificilTimeMs, getRetoTimeMs, getMaxUnlockedTable, setMaxUnlockedTable,
+  setDificilTimeMs, setRetoTimeMs,
 } from '../engine/state.js';
 import {
   buildJuego1Round, buildJuego2Queue, buildJuego3Round, advanceQueue,
@@ -34,10 +36,12 @@ export function renderMapa(root, params, ctx) {
     ${headerHtml({ title: 'Multitablas', showBack: false })}
     <nav class="top-actions">
       <button class="btn btn-secondary" data-action="libre">🎯 Práctica libre</button>
+      <button class="btn btn-secondary" data-action="ajustes">⚙️ Ajustes</button>
     </nav>
     <main class="screen level-map">${nodes}</main>`;
   wireHeader(root);
   root.querySelector('[data-action="libre"]').addEventListener('click', () => navigate('/libre'));
+  root.querySelector('[data-action="ajustes"]').addEventListener('click', () => navigate('/ajustes'));
   root.querySelectorAll('[data-action="open-table"]').forEach(btn => {
     btn.addEventListener('click', () => navigate(`/tabla/${btn.dataset.id}`));
   });
@@ -181,21 +185,31 @@ export function renderHub(root, params, ctx) {
     ${headerHtml({ title: meta.label })}
     <main class="screen hub-screen">
       <div class="hub-character">${characterSlotHtml(ctx, tableId, progress.retoFinal.completed ? 'celebrando' : 'feliz', 'xl')}</div>
+      <button class="btn btn-secondary btn-estudiar" data-action="estudiar">📖 Estudiar la tabla</button>
       <div class="card-grid">
-        ${gameCardHtml('juego1', progress.juego1)}
-        ${gameCardHtml('juego2', progress.juego2)}
-        ${gameCardHtml('juego3', progress.juego3)}
+        ${gameCardHtml('juego1', progress.juego1, isJuegoUnlocked(tableId, 'juego1'))}
+        ${gameCardHtml('juego2', progress.juego2, isJuegoUnlocked(tableId, 'juego2'))}
+        ${gameCardHtml('juego3', progress.juego3, isJuegoUnlocked(tableId, 'juego3'))}
         ${retoCardHtml(progress.retoFinal, canReto)}
       </div>
     </main>`;
   wireHeader(root, { backHref: '/' });
-  root.querySelectorAll('[data-action="open-game"]').forEach(btn => {
+  root.querySelector('[data-action="estudiar"]').addEventListener('click', () => navigate(`/tabla/${tableId}/estudiar`));
+  root.querySelectorAll('[data-action="open-game"]:not(:disabled)').forEach(btn => {
     btn.addEventListener('click', () => navigate(`/tabla/${tableId}/${btn.dataset.game}`));
   });
 }
 
-function gameCardHtml(key, entry) {
+function gameCardHtml(key, entry, unlocked) {
   const meta = GAME_META[key];
+  if (!unlocked) {
+    return `
+      <button class="game-card" data-action="open-game" data-game="${key}" disabled aria-disabled="true">
+        <span class="game-card-title">${meta.title}</span>
+        <span class="game-card-diff diff-${meta.difficulty}">${diffLabel(meta.difficulty)}</span>
+        <span class="game-card-hint">🔒 Saca más de 7 en el nivel anterior</span>
+      </button>`;
+  }
   return `
     <button class="game-card" data-action="open-game" data-game="${key}">
       <span class="game-card-title">${meta.title}</span>
@@ -294,6 +308,7 @@ export function renderJuego1(root, params, ctx) {
 export function renderJuego2(root, params, ctx) {
   const tableId = Number(params.id);
   if (!tableExists(tableId) || !isTableUnlocked(tableId)) { navigate('/'); return; }
+  if (!isJuegoUnlocked(tableId, 'juego2')) { navigate(`/tabla/${tableId}`); return; }
   const meta = getTableMeta(tableId);
   let queue = buildJuego2Queue(tableId);
   const myEpoch = getEpoch();
@@ -370,6 +385,7 @@ export function renderJuego2(root, params, ctx) {
 export function renderJuego3(root, params, ctx) {
   const tableId = Number(params.id);
   if (!tableExists(tableId) || !isTableUnlocked(tableId)) { navigate('/'); return; }
+  if (!isJuegoUnlocked(tableId, 'juego3')) { navigate(`/tabla/${tableId}`); return; }
   const meta = getTableMeta(tableId);
   const questions = buildJuego3Round(tableId);
   const myEpoch = getEpoch();
@@ -418,7 +434,7 @@ export function renderJuego3(root, params, ctx) {
     answering = true;
     timer?.stop();
     timer = createSoftTimer({
-      durationMs: 11000,
+      durationMs: getDificilTimeMs(),
       onTick: fraction => { if (getEpoch() === myEpoch) updateTimerBar(root, fraction); },
       onTimeout: () => submitAnswer(true),
     });
@@ -507,7 +523,7 @@ export function renderRetoFinal(root, params, ctx) {
     answering = true;
     timer?.stop();
     timer = createSoftTimer({
-      durationMs: 9000,
+      durationMs: getRetoTimeMs(),
       onTick: fraction => { if (getEpoch() === myEpoch) updateTimerBar(root, fraction); },
       onTimeout: () => submitAnswer(true),
     });
@@ -557,4 +573,124 @@ export function renderRetoFinal(root, params, ctx) {
   }
 
   renderQuestion();
+}
+
+// ---------------------------------------------------------------------------
+// Estudiar tabla: consulta opcional de la tabla con resultados, sin puntaje
+// ni tiempo, antes de empezar los niveles.
+// ---------------------------------------------------------------------------
+export function renderEstudiarTabla(root, params, ctx) {
+  const tableId = Number(params.id);
+  if (!tableExists(tableId) || !isTableUnlocked(tableId)) { navigate('/'); return; }
+  const meta = getTableMeta(tableId);
+  const rows = FACTORS.map(f => `
+    <li class="study-row">
+      <span class="study-op">${tableId} × ${f}</span>
+      <span class="study-eq">=</span>
+      <span class="study-result">${tableId * f}</span>
+    </li>`).join('');
+
+  root.innerHTML = `
+    ${headerHtml({ title: `${meta.label} · Estudiar` })}
+    <main class="screen study-screen">
+      ${characterSlotHtml(ctx, tableId, 'feliz', 'md')}
+      <ul class="study-list">${rows}</ul>
+      <button class="btn btn-primary" data-action="listo">¡Listo, a jugar!</button>
+    </main>`;
+  wireHeader(root, { backHref: `/tabla/${tableId}` });
+  root.querySelector('[data-action="listo"]').addEventListener('click', () => navigate(`/tabla/${tableId}`));
+}
+
+// ---------------------------------------------------------------------------
+// Ajustes: solo para personas adultas. Primero verifica la fecha de
+// nacimiento (mayor de 18) y luego permite configurar tiempos de respuesta
+// y hasta qué tabla puede desbloquearse.
+// ---------------------------------------------------------------------------
+function calcAge(birthDateStr) {
+  const birth = new Date(`${birthDateStr}T00:00:00`);
+  if (Number.isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+export function renderAjustes(root, params, ctx) {
+  renderAgeGate();
+
+  function renderAgeGate() {
+    root.innerHTML = `
+      ${headerHtml({ title: 'Ajustes' })}
+      <main class="screen ajustes-screen">
+        <div class="age-gate-card">
+          <p class="age-gate-icon" aria-hidden="true">🔒</p>
+          <p class="age-gate-text">Los ajustes son para personas adultas. Ingresa tu fecha de nacimiento para continuar.</p>
+          <label class="age-gate-label" for="birthdate-input">Fecha de nacimiento</label>
+          <input type="date" id="birthdate-input" class="age-gate-input" max="${new Date().toISOString().slice(0, 10)}" />
+          <button class="btn btn-primary" data-action="verify">Entrar</button>
+          <p class="age-gate-error" data-role="age-error" hidden>Debes ser mayor de edad para entrar a los ajustes.</p>
+        </div>
+      </main>`;
+    wireHeader(root, { backHref: '/' });
+    root.querySelector('[data-action="verify"]').addEventListener('click', () => {
+      const value = root.querySelector('#birthdate-input').value;
+      const age = value ? calcAge(value) : null;
+      if (age === null || age < 18) {
+        root.querySelector('[data-role="age-error"]').hidden = false;
+        setTimeout(() => navigate('/'), 1800);
+        return;
+      }
+      renderSettingsForm();
+    });
+  }
+
+  function renderSettingsForm() {
+    const dificilSec = Math.round(getDificilTimeMs() / 1000);
+    const retoSec = Math.round(getRetoTimeMs() / 1000);
+    const maxTable = getMaxUnlockedTable();
+
+    root.innerHTML = `
+      ${headerHtml({ title: 'Ajustes' })}
+      <main class="screen ajustes-screen">
+        <section class="ajustes-section">
+          <h2 class="ajustes-heading">Tiempo de respuesta</h2>
+          <label class="ajustes-field">
+            <span>Nivel Difícil (segundos)</span>
+            <input type="number" min="3" max="30" step="1" data-role="dificil-time" value="${dificilSec}" />
+          </label>
+          <label class="ajustes-field">
+            <span>Reto Final (segundos)</span>
+            <input type="number" min="3" max="30" step="1" data-role="reto-time" value="${retoSec}" />
+          </label>
+        </section>
+        <section class="ajustes-section">
+          <h2 class="ajustes-heading">Tablas desbloqueadas</h2>
+          <p class="ajustes-hint">Elige una tabla para que quede jugable de inmediato, sin tener que ganársela primero. "Progreso normal" deja que se vayan desbloqueando solas al superar cada Reto Final.</p>
+          <label class="ajustes-field">
+            <span>Desbloquear hasta la tabla</span>
+            <select data-role="max-table">
+              <option value="none" ${maxTable == null ? 'selected' : ''}>Progreso normal (sin tope)</option>
+              ${BASE_TABLE_IDS.map(id => `<option value="${id}" ${id === maxTable ? 'selected' : ''}>Tabla del ${id}</option>`).join('')}
+            </select>
+          </label>
+        </section>
+        <button class="btn btn-primary" data-action="guardar">Guardar</button>
+        <p class="ajustes-saved" data-role="saved-msg" hidden>¡Guardado! ✔</p>
+      </main>`;
+    wireHeader(root, { backHref: '/' });
+    root.querySelector('[data-action="guardar"]').addEventListener('click', () => {
+      const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+      const dificilInput = clamp(Number(root.querySelector('[data-role="dificil-time"]').value) || 3, 3, 30);
+      const retoInput = clamp(Number(root.querySelector('[data-role="reto-time"]').value) || 3, 3, 30);
+      const maxTableRaw = root.querySelector('[data-role="max-table"]').value;
+      const maxTableInput = maxTableRaw === 'none' ? null : Number(maxTableRaw);
+      setDificilTimeMs(dificilInput * 1000);
+      setRetoTimeMs(retoInput * 1000);
+      setMaxUnlockedTable(maxTableInput);
+      const savedMsg = root.querySelector('[data-role="saved-msg"]');
+      savedMsg.hidden = false;
+      setTimeout(() => { savedMsg.hidden = true; }, 1600);
+    });
+  }
 }

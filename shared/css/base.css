@@ -73,6 +73,8 @@ button {
 .top-actions {
   display: flex;
   justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
   padding: 0 14px 8px;
 }
 
@@ -246,6 +248,88 @@ button {
 /* ---------- Hub de tabla ---------- */
 .hub-screen { gap: 14px; }
 .hub-character .character-slot { width: 140px; height: 140px; margin: 0 auto 8px; }
+.btn-estudiar { width: 100%; max-width: 480px; }
+
+/* ---------- Estudiar tabla ---------- */
+.study-screen { gap: 16px; }
+.study-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.study-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.study-op { text-align: right; }
+.study-eq { text-align: center; color: var(--color-text-muted, #666); font-weight: 700; }
+.study-result { text-align: left; color: var(--color-primary); }
+
+/* ---------- Ajustes ---------- */
+.ajustes-screen { gap: 18px; width: 100%; max-width: 420px; margin: 0 auto; }
+
+.age-gate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px;
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  text-align: center;
+}
+.age-gate-icon { font-size: 2.4rem; margin: 0; }
+.age-gate-text { margin: 0; color: var(--color-text-muted, #666); }
+.age-gate-label { font-weight: 700; align-self: flex-start; }
+.age-gate-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--color-node-locked);
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.age-gate-error { color: var(--color-error); font-weight: 700; margin: 0; }
+
+.ajustes-section {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ajustes-heading { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.ajustes-hint { margin: 0; font-size: 0.85rem; color: var(--color-text-muted, #666); }
+.ajustes-field { display: flex; flex-direction: column; gap: 6px; font-weight: 700; }
+.ajustes-field input, .ajustes-field select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--color-node-locked);
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.ajustes-saved { color: var(--color-success); font-weight: 800; text-align: center; margin: 0; }
 
 /* ---------- Pantalla de juego ---------- */
 .game-screen {
